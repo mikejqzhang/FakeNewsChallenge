@@ -1,0 +1,73 @@
+{
+    "dataset_reader": {
+        "type": "fnc_dataset"
+    },
+    "iterator": {
+        "type": "bucket",
+        "batch_size": 64,
+        "sorting_keys": [
+            [
+                "body",
+                "num_tokens"
+            ],
+            [
+                "headline",
+                "num_tokens"
+            ]
+        ]
+    },
+    "model": {
+        "type": "baseline_model",
+        "abstract_encoder": {
+            "type": "lstm",
+            "bidirectional": true,
+            "dropout": 0.2,
+            "hidden_size": 100,
+            "input_size": 100,
+            "num_layers": 1
+        },
+        "classifier_feedforward": {
+            "activations": [
+                "relu",
+                "linear"
+            ],
+            "dropout": [
+                0.2,
+                0
+            ],
+            "hidden_dims": [
+                200,
+                3
+            ],
+            "input_dim": 400,
+            "num_layers": 2
+        },
+        "text_field_embedder": {
+            "tokens": {
+                "type": "embedding",
+                "embedding_dim": 100,
+                "trainable": true
+            }
+        },
+        "title_encoder": {
+            "type": "lstm",
+            "bidirectional": true,
+            "dropout": 0.2,
+            "hidden_size": 100,
+            "input_size": 100,
+            "num_layers": 1
+        }
+    },
+    "train_data_path": "fnc-1/train_data.csv",
+    "validation_data_path": "fnc-1/dev_data.csv",
+    "trainer": {
+        "cuda_device": -1,
+        "grad_clipping": 5,
+        "num_epochs": 40,
+        "optimizer": {
+            "type": "adagrad"
+        },
+        "patience": 10,
+        "validation_metric": "+accuracy"
+    }
+}
