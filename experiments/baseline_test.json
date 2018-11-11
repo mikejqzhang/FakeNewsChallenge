@@ -2,8 +2,8 @@
   "dataset_reader": {
     "type": "fnc_dataset"
   },
-  "train_data_path": "fnc-1/train_data.csv",
-  "validation_data_path": "fnc-1/dev_data.csv",
+  "train_data_path": "fnc-1/train_head.csv",
+  "validation_data_path": "fnc-1/dev_head.csv",
   "model": {
     "type": "baseline_model",
     "text_field_embedder": {

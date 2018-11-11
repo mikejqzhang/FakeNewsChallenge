@@ -18,7 +18,7 @@
     },
     "model": {
         "type": "baseline_model",
-        "abstract_encoder": {
+        "body_encoder": {
             "type": "lstm",
             "bidirectional": true,
             "dropout": 0.2,
@@ -37,31 +37,32 @@
             ],
             "hidden_dims": [
                 200,
-                3
+                4
             ],
             "input_dim": 400,
             "num_layers": 2
         },
-        "text_field_embedder": {
-            "tokens": {
-                "type": "embedding",
-                "embedding_dim": 100,
-                "trainable": true
-            }
-        },
-        "title_encoder": {
+        "headline_encoder": {
             "type": "lstm",
             "bidirectional": true,
             "dropout": 0.2,
             "hidden_size": 100,
             "input_size": 100,
             "num_layers": 1
+        },
+        "text_field_embedder": {
+            "tokens": {
+                "type": "embedding",
+                "embedding_dim": 100,
+                "pretrained_file": "https://s3-us-west-2.amazonaws.com/allennlp/datasets/glove/glove.6B.100d.txt.gz",
+                "trainable": false
+            }
         }
     },
     "train_data_path": "fnc-1/train_data.csv",
     "validation_data_path": "fnc-1/dev_data.csv",
     "trainer": {
-        "cuda_device": -1,
+        "cuda_device": 0,
         "grad_clipping": 5,
         "num_epochs": 40,
         "optimizer": {
