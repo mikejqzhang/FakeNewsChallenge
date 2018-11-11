@@ -27,7 +27,7 @@ class BasicSequenceModel(Model):
         super(BasicSequenceModel, self).__init__(vocab, regularizer)
 
         self.text_field_embedder = text_field_embedder
-        self.num_classes = self.vocab.get_vocab_size('stance')
+        self.num_classes = self.vocab.get_vocab_size('labels')
         self.headline_encoder = headline_encoder
         self.body_encoder = body_encoder
         self.classifier_feedforward = classifier_feedforward
@@ -39,7 +39,7 @@ class BasicSequenceModel(Model):
 
         initializer(self)
 
-    def forward(self, headline, body, stance):
+    def forward(self, headline, body, stance=None):
         embedded_headline = self.text_field_embedder(headline)
         headline_mask = util.get_text_field_mask(headline)
         encoded_headline = self.headline_encoder(embedded_headline, headline_mask)
@@ -64,7 +64,7 @@ class BasicSequenceModel(Model):
 
         predictions = class_probabilities.cpu().data.numpy()
         argmax_indices = numpy.argmax(predictions, axis=-1)
-        stance = [self.vocab.get_token_from_index(x, namespace="stance")
+        stance = [self.vocab.get_token_from_index(x, namespace="labels")
                   for x in argmax_indices]
         output_dict['stance'] = stance
         return output_dict
