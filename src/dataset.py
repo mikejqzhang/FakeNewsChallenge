@@ -12,10 +12,13 @@ logger = logging.getLogger(__name__)
 
 @DatasetReader.register("fnc_dataset")
 class FNCDataSetReader(DatasetReader):
-    def __init__(self, lazy=False):
+    def __init__(self,
+                 tokenizer=None,
+                 token_indexers=None,
+                 lazy=False):
         super().__init__(lazy)
-        self._tokenizer = WordTokenizer()
-        self._token_indexers = {"tokens": SingleIdTokenIndexer()}
+        self._tokenizer = tokenizer or WordTokenizer()
+        self._token_indexers = token_indexers or {"tokens": SingleIdTokenIndexer()}
 
     def _read(self, file_path):
         with open(file_path, "r") as data_file:

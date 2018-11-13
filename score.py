@@ -1,6 +1,6 @@
 import file_handling as fh
 
-pred_file = 'test_preds.txt'
+pred_file = 'test_preds_advanced.txt'
 test_file = 'fnc-1/test_data.csv'
 
 pred_data = fh.read_jsonlist(pred_file)
