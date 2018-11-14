@@ -24,9 +24,9 @@ if __name__ == '__main__':
     test_stances = 'fnc-1/competition_test_stances.csv'
     test_bodies = 'fnc-1/competition_test_bodies.csv'
 
-    train_data = 'fnc-1/train_data.csv' 
-    dev_data = 'fnc-1/dev_data.csv' 
-    test_data = 'fnc-1/test_data.csv'
+    train_data = 'data/train_data.csv' 
+    dev_data = 'data/dev_data.csv' 
+    test_data = 'data/test_data.csv'
 
     train = merge_data(train_stances, train_bodies)
     random.shuffle(train)
