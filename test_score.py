@@ -1,9 +1,7 @@
 import file_handling as fh
 
-pred_file = 'preds/test_preds_decomp.txt'
-test_file = 'data/test_data.csv'
+test_file = 'data/dev_data.csv'
 
-pred_data = fh.read_jsonlist(pred_file)
 test_data = fh.read_jsonlist(test_file)
 
 n_total = 0.0
@@ -11,9 +9,13 @@ n_correct = 0.0
 
 total_score = 0.0
 top_score = 0.0
-for pred_dict, gold_dict in zip(pred_data, test_data):
-    pred = pred_dict['stance']
+for gold_dict in test_data:
     gold = gold_dict['stance']
+    if gold == 'unrelated':
+        pred = 'unrelated'
+    else:
+        pred = 'discuss'
+
     n_total += 1
     n_correct += pred == gold
     

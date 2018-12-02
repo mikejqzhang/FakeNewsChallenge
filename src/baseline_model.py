@@ -41,11 +41,12 @@ class BasicSequenceModel(Model):
         }
         weight = torch.ones(vocab.get_vocab_size('labels'))
         weight[vocab.get_token_to_index_vocabulary('labels')['unrelated']] = .25
-        self.loss = torch.nn.CrossEntropyLoss(weight=weight)
+        self.loss = torch.nn.CrossEntropyLoss()
+        # self.loss = torch.nn.CrossEntropyLoss(weight=weight)
 
         initializer(self)
 
-    def forward(self, headline, body, stance=None):
+    def forward(self, headline, body, stance=None, metadata=None):
         embedded_headline = self.text_field_embedder(headline)
         headline_mask = util.get_text_field_mask(headline)
         encoded_headline = self.headline_encoder(embedded_headline, headline_mask)
