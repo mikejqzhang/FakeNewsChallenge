@@ -27,14 +27,13 @@ class DecomposableAttentionModel(Model):
                  body_encoder: Optional[Seq2SeqEncoder] = None,
                  initializer: InitializerApplicator = InitializerApplicator(),
                  regularizer: Optional[RegularizerApplicator] = None) -> None:
-        super(DecomposableAttention, self).__init__(vocab, regularizer)
+        super(DecomposableAttentionModel, self).__init__(vocab, regularizer)
 
         self._text_field_embedder = text_field_embedder
         self._attend_feedforward = TimeDistributed(attend_feedforward)
         self._matrix_attention = LegacyMatrixAttention(similarity_function)
         self._compare_feedforward = TimeDistributed(compare_feedforward)
         self._aggregate_feedforward = aggregate_feedforward
-        self._crafted_features_feedforward = crafted_features_feedforward
         self._headline_encoder = headline_encoder
         self._body_encoder = body_encoder or headline_encoder
 
@@ -55,7 +54,7 @@ class DecomposableAttentionModel(Model):
                 headline_sentiment=None,
                 body_sentiment=None,
                 tfidf=None,
-                label: torch.IntTensor = None,
+                stance: torch.IntTensor = None,
                 metadata: List[Dict[str, Any]] = None) -> Dict[str, torch.Tensor]:
         # pylint: disable=arguments-differ
         embedded_headline = self._text_field_embedder(headline)
@@ -111,9 +110,9 @@ class DecomposableAttentionModel(Model):
                        "h2p_attention": h2p_attention,
                        "p2h_attention": p2h_attention}
 
-        if label is not None:
-            loss = self._loss(label_logits, label.long().view(-1))
-            self._accuracy(label_logits, label)
+        if stance is not None:
+            loss = self._loss(label_logits, stance.long().view(-1))
+            self._accuracy(label_logits, stance)
             output_dict["loss"] = loss
 
         if metadata is not None:
