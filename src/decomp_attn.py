@@ -21,8 +21,8 @@ class DecomposableAttentionModel(Model):
                  similarity_function: SimilarityFunction,
                  compare_feedforward: FeedForward,
                  aggregate_feedforward: FeedForward,
-                 unrelated_weight: float = 1.0,
-                 crafted_features_feedforward: Optional[FeedForward] = None,
+                 use_sentiment: bool,
+                 use_tfidf: bool,
                  headline_encoder: Optional[Seq2SeqEncoder] = None,
                  body_encoder: Optional[Seq2SeqEncoder] = None,
                  initializer: InitializerApplicator = InitializerApplicator(),
@@ -40,23 +40,21 @@ class DecomposableAttentionModel(Model):
 
         self._num_labels = vocab.get_vocab_size(namespace="labels")
 
-        check_dimensions_match(text_field_embedder.get_output_dim(), attend_feedforward.get_input_dim(),
-                               "text field embedding dim", "attend feedforward input dim")
-        check_dimensions_match(aggregate_feedforward.get_output_dim(), self._num_labels,
-                               "final output dimension", "number of labels")
+        self.use_sentiment = use_sentiment
+        self.use_tfidf = use_tfidf
 
         self._accuracy = CategoricalAccuracy()
 
-        weight = torch.ones(vocab.get_vocab_size('labels'))
-        weight[vocab.get_token_to_index_vocabulary('labels')['unrelated']] = unrelated_weight
-        self._loss = torch.nn.CrossEntropyLoss(weight=weight)
+        self._loss = torch.nn.CrossEntropyLoss()
 
         initializer(self)
 
     def forward(self,  # type: ignore
                 headline: Dict[str, torch.LongTensor],
                 body: Dict[str, torch.LongTensor],
-                crafted_features: torch.FloatTensor = None,
+                headline_sentiment=None,
+                body_sentiment=None,
+                tfidf=None,
                 label: torch.IntTensor = None,
                 metadata: List[Dict[str, Any]] = None) -> Dict[str, torch.Tensor]:
         # pylint: disable=arguments-differ
@@ -98,10 +96,11 @@ class DecomposableAttentionModel(Model):
         # Shape: (batch_size, compare_dim)
         compared_body = compared_body.sum(dim=1)
 
-        if crafted_features is not None:
-            aggregate_input = torch.cat([compared_headline, compared_body, crafted_features], dim=-1)
-        else:
-            aggregate_input = torch.cat([compared_headline, compared_body], dim=-1)
+        aggregate_input = torch.cat([compared_headline, compared_body], dim=-1)
+        if self.use_sentiment:
+            aggregate_input = torch.cat([aggregate_input, headline_sentiment, body_sentiment], dim=-1)
+        if self.use_tfidf:
+            aggregate_input = torch.cat([aggregate_input, tfidf], dim=-1)
             
 
         label_logits = self._aggregate_feedforward(aggregate_input)

@@ -1,12 +1,14 @@
 import json
-
 import logging
+
+import numpy as np
 
 from allennlp.data.dataset_readers.dataset_reader import DatasetReader
 from allennlp.data.fields import Field, ArrayField, LabelField, TextField, MetadataField
 from allennlp.data.instance import Instance
 from allennlp.data.tokenizers import Tokenizer, WordTokenizer
 from allennlp.data.token_indexers import TokenIndexer, SingleIdTokenIndexer
+
 
 logger = logging.getLogger(__name__)
 
@@ -30,9 +32,9 @@ class FNCCraftedDataSetReader(DatasetReader):
                 data_json = json.loads(line)
                 headline = data_json['headline']
                 body = data_json['body']
-                headline_sentiment = data_json['headline_senti']
-                body_sentiment = data_json['body_senti']
-                tfidf = data_json['cos_sim']
+                headline_sentiment = np.asarray(data_json['headline_senti'])
+                body_sentiment = np.asarray(data_json['body_senti'])
+                tfidf = np.asarray([data_json['cos_sim']])
                 stance = data_json['stance']
                 yield self.text_to_instance(headline, body, headline_sentiment, body_sentiment, tfidf, stance)
 
@@ -45,14 +47,15 @@ class FNCCraftedDataSetReader(DatasetReader):
         body_sentiment_field = ArrayField(body_sentiment)
         tfidf_field = ArrayField(tfidf)
         fields = {'headline': headline_field,
-                  'body': body_field
-                  'headline_sentiment': headline_sentiment_field
-                  'body_sentiment': body_sentiment_field
+                  'body': body_field,
+                  'headline_sentiment': headline_sentiment_field,
+                  'body_sentiment': body_sentiment_field,
                   'tfidf': tfidf_field
                   }
         if stance is not None:
             fields['stance'] = LabelField(stance)
         metadata = {"headline_tokens": [x.text for x in headline_tokens],
-                    "body_tokens": [x.text for x in body_tokens]}
+                    "body_tokens": [x.text for x in body_tokens]
+                    }
         fields["metadata"] = MetadataField(metadata)
         return Instance(fields)

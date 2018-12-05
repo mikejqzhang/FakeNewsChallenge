@@ -21,9 +21,9 @@ class BasicSequenceModel(Model):
                  text_field_embedder: TextFieldEmbedder,
                  headline_encoder: Seq2VecEncoder,
                  body_encoder: Seq2VecEncoder,
+                 use_sentiment: bool,
+                 use_tfidf: bool,
                  classifier_feedforward: FeedForward,
-                 headline_weight: float = 1.0,
-                 body_weight: float = 1.0,
                  initializer: InitializerApplicator = InitializerApplicator(),
                  regularizer: Optional[RegularizerApplicator] = None) -> None:
         super(BasicSequenceModel, self).__init__(vocab, regularizer)
@@ -33,31 +33,40 @@ class BasicSequenceModel(Model):
         self.headline_encoder = headline_encoder
         self.body_encoder = body_encoder
         self.classifier_feedforward = classifier_feedforward
-        self.headline_weight = headline_weight
-        self.body_weight = body_weight
+
+        self.use_sentiment = use_sentiment
+        self.use_tfidf = use_tfidf
 
         self.metrics = {
                 "accuracy": CategoricalAccuracy(),
         }
-        weight = torch.ones(vocab.get_vocab_size('labels'))
-        weight[vocab.get_token_to_index_vocabulary('labels')['unrelated']] = .25
         self.loss = torch.nn.CrossEntropyLoss()
-        # self.loss = torch.nn.CrossEntropyLoss(weight=weight)
 
         initializer(self)
 
-    def forward(self, headline, body, stance=None, metadata=None):
+    def forward(self,
+                headline,
+                body,
+                headline_sentiment=None,
+                body_sentiment=None,
+                tfidf=None,
+                stance=None,
+                metadata=None):
         embedded_headline = self.text_field_embedder(headline)
         headline_mask = util.get_text_field_mask(headline)
         encoded_headline = self.headline_encoder(embedded_headline, headline_mask)
-        encoded_headline = encoded_headline * self.headline_weight
 
         embedded_body = self.text_field_embedder(body)
         body_mask = util.get_text_field_mask(body)
         encoded_body = self.body_encoder(embedded_body, body_mask)
-        encoded_body = encoded_body * self.body_weight
 
-        logits = self.classifier_feedforward(torch.cat([encoded_headline, encoded_body], dim=-1))
+        aggregate_input = torch.cat([encoded_headline, encoded_body], dim=-1)
+        if self.use_sentiment:
+            aggregate_input = torch.cat([aggregate_input, headline_sentiment, body_sentiment], dim=-1)
+        if self.use_tfidf:
+            aggregate_input = torch.cat([aggregate_input, tfidf], dim=-1)
+
+        logits = self.classifier_feedforward(aggregate_input)
         output_dict = {'logits': logits}
         if stance is not None:
             loss = self.loss(logits, stance)

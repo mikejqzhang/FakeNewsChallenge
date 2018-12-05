@@ -1,0 +1,76 @@
+{
+    "dataset_reader": {
+        "type": "fnc_dataset_crafted"
+    },
+    "iterator": {
+        "type": "bucket",
+        "batch_size": 64,
+        "sorting_keys": [
+            [
+                "body",
+                "num_tokens"
+            ],
+            [
+                "headline",
+                "num_tokens"
+            ]
+        ]
+    },
+    "model": {
+        "type": "baseline_model",
+        "body_encoder": {
+            "type": "lstm",
+            "bidirectional": true,
+            "dropout": 0.2,
+            "hidden_size": 100,
+            "input_size": 300,
+            "num_layers": 1
+        },
+        "classifier_feedforward": {
+            "activations": [
+                "relu",
+                "linear"
+            ],
+            "dropout": [
+                0.2,
+                0
+            ],
+            "hidden_dims": [
+                200,
+                4
+            ],
+            "input_dim": 409,
+            "num_layers": 2
+        },
+        "headline_encoder": {
+            "type": "lstm",
+            "bidirectional": true,
+            "dropout": 0.2,
+            "hidden_size": 100,
+            "input_size": 300,
+            "num_layers": 1
+        },
+        "text_field_embedder": {
+            "tokens": {
+                "type": "embedding",
+                "embedding_dim": 300,
+                "pretrained_file": "https://s3-us-west-2.amazonaws.com/allennlp/datasets/glove/glove.6B.300d.txt.gz",
+                "trainable": false
+            }
+        },
+        "use_sentiment": true,
+        "use_tfidf": true
+    },
+    "train_data_path": "data/train_head.jsonl",
+    "validation_data_path": "data/dev_head.jsonl",
+    "trainer": {
+        "cuda_device": -1,
+        "grad_clipping": 5,
+        "num_epochs": 1,
+        "optimizer": {
+            "type": "adagrad"
+        },
+        "patience": 10,
+        "validation_metric": "+accuracy"
+    }
+}
