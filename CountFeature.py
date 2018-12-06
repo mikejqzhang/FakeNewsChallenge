@@ -21,7 +21,7 @@ def extract_all(data_list):
 
 		pair_list = list(zip(headlines, bodies))
 	return headlines, bodies, stances, pairs, pair_list
-    
+
 # (2) count how many words in headline appears in the body, and normalize by the length of the headline
 def MatchedWordFeature(pair_list, ngram):
     m = []
@@ -45,21 +45,54 @@ def MatchedWordFeature(pair_list, ngram):
 
     return m
 
-if __name__ == '__main__':
 
-    train_data = 'fnc-1/train_data.csv'
-    test_data = 'fnc-1/test_data.csv'
-    dev_data  = 'fnc-1/dev_data.csv'
+train_data = 'fnc-1/train_data.csv'
+test_data = 'fnc-1/test_data.csv'
+dev_data  = 'fnc-1/dev_data.csv'
 
-    train_data = fh.read_jsonlist(train_data)
-    test_data = fh.read_jsonlist(test_data)
-    dev_data = fh.read_jsonlist(dev_data)
+train_data = fh.read_jsonlist(train_data)
+test_data = fh.read_jsonlist(test_data)
+dev_data = fh.read_jsonlist(dev_data)
 
-    train_headlines, train_bodies, train_stances, train_pairs, train_pair_list = extract_all(train_data)
-    dev_headlines, dev_bodies, dev_stances, dev_pairs, dev_pair_list = extract_all(dev_data)
-    test_headlines, test_bodies, test_stances, test_pairs, test_pair_list = extract_all(test_data)
+train_headlines, train_bodies, train_stances, train_pairs, train_pair_list = extract_all(train_data)
+dev_headlines, dev_bodies, dev_stances, dev_pairs, dev_pair_list = extract_all(dev_data)
+test_headlines, test_bodies, test_stances, test_pairs, test_pair_list = extract_all(test_data)
 
 
-    train_matched_ratio = MatchedWordFeature(train_pair_list, 1)
-    dev_matched_ratio = MatchedWordFeature(dev_pair_list, 1)
-    test_matched_ratio = MatchedWordFeature(test_pair_list, 1)
+train_m1 = MatchedWordFeature(train_pair_list, 1)
+with open("train_m1.pkl", "wb") as fp:   #Pickling
+      pickle.dump(train_m1, fp)
+
+train_m2 = MatchedWordFeature(train_pair_list, 2)
+with open("train_m2.pkl", "wb") as fp:   #Pickling
+      pickle.dump(train_m2, fp)
+
+train_m3 = MatchedWordFeature(train_pair_list, 3)
+with open("train_m3.pkl", "wb") as fp:   #Pickling
+      pickle.dump(train_m3, fp)
+
+
+
+dev_m1 = MatchedWordFeature(dev_pair_list, 1)
+with open("dev_m1.pkl", "wb") as fp:   #Pickling
+      pickle.dump(dev_m1, fp)
+
+dev_m2 = MatchedWordFeature(dev_pair_list, 2)
+with open("dev_m2.pkl", "wb") as fp:   #Pickling
+      pickle.dump(dev_m2, fp)
+
+dev_m3 = MatchedWordFeature(dev_pair_list, 3)
+with open("dev_m3.pkl", "wb") as fp:   #Pickling
+      pickle.dump(dev_m3, fp)
+
+test_m1 = MatchedWordFeature(test_pair_list, 1)
+with open("test_m1.pkl", "wb") as fp:   #Pickling
+      pickle.dump(test_m1, fp)
+
+test_m2 = MatchedWordFeature(test_pair_list, 2)
+with open("test_m2.pkl", "wb") as fp:   #Pickling
+      pickle.dump(test_m2, fp)
+
+test_m3 = MatchedWordFeature(test_pair_list, 3)
+with open("test_m3.pkl", "wb") as fp:   #Pickling
+      pickle.dump(test_m3, fp)
